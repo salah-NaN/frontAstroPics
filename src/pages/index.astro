@@ -1,0 +1,80 @@
+---
+import General from "../layouts/General.astro";
+// import { toast } from "solid-toast";
+import Toast from "../components/Toast"
+import Login from "./Login.astro";
+
+// constants
+const URL = "https://ricardhernandez.com/api";
+let alert = false;
+
+// delete cookie when user is at Login page
+Astro.cookies.delete("token");
+if (Astro.request.method === "POST") {
+  const data = await Astro.request.formData();
+  const name = data.get("name");
+  const password = data.get("password");
+
+
+  // fetch to login credentials
+  const response = await fetch(`${URL}/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({ name, password }),
+  })
+    .then((res) => res.json())
+    .then((res) => {
+      if (res.token) {
+        console.log(res);
+        Astro.cookies.set("token", res.token);
+        // Astro.response.headers.append("token", res.token);
+      }
+      console.log(res);
+      if (res.error) {
+        alert = true;
+      }
+    })
+    .catch((err) => console.error(err));
+
+  if (Astro.cookies.has("token")) {
+    return Astro.redirect("/Home");
+  }
+}
+---
+
+<General>
+  {
+    alert ? (
+      <div>
+        <div class=" error w-1/2 top-[108px] left-1/2 -translate-x-1/2 absolute py-2 text-center bg-[#c93636] text-[#fafafa] rounded-lg shadow">
+          Login error!
+        </div>
+      </div>
+    ) : (
+      <div>
+        <div class=" error hidden w-1/2 top-24 left-1/2 -translate-x-1/2 absolute py-2 text-center bg-[#c93636] text-[#fafafa] rounded-lg shadow  ">
+          Login error
+        </div>
+      </div>
+    )
+  }
+  <!-- <script>
+    import { toast } from "solid-toast";
+
+    const element = document.getElementsByClassName("error");
+    const showError = () => {
+      console.log(element);
+      if (!element[0].classList.contains("hidden")) {
+        toast.error("error");
+        console.log("test");
+      }
+    };
+    showError();
+  </script> -->
+  <Login />
+  <!-- <Toast client:load /> -->
+</General>
+

@@ -1,0 +1,140 @@
+---
+import General from "../layouts/General.astro";
+import Back from "../components/Back.astro";
+
+
+// constants
+const URL = "https://ricardhernandez.com/api";
+
+// if is not cookie redirect
+if (!Astro.cookies.has("token")) {
+  return Astro.redirect("/");
+}
+
+// to prepare security of fetchs and send a header with cookie
+const token = Astro.cookies.get("token").value;
+
+// fetch to refresh the page and check if cookie is valid
+let invalidToken = false;
+const refresh = await fetch(`${URL}/refresh`, {
+  method: "GET",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  },
+})
+  .then((res) => res.json())
+  .then((res) => {
+    if (res.error) invalidToken = true;
+  })
+  .catch((err) => console.error(err));
+// if invalid token then redirect
+if (invalidToken) {
+  return Astro.redirect("/");
+}
+
+
+// alert to control error
+let alert = false
+if (Astro.request.method === "POST") {
+  const data = await Astro.request.formData();
+  const image = data.get("file") as File;
+  const comment = data.get("hashtags");
+
+  const dataSend = new FormData();
+  dataSend.append("file", image);
+  dataSend.append("hashtags", comment);
+
+
+  console.log(dataSend)
+  try {
+    // fetch to upload a post
+    const options = {
+      method: "POST",
+      body: dataSend,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    let upload = await fetch(`${URL}/upload`, options);
+    upload = await upload.json();
+    console.log(upload)
+    if (upload.message) return Astro.redirect("/Home");
+    if(upload.error) alert = true
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+---
+
+<General>
+
+  {
+    alert  
+    ?
+    <div>
+      <div class=" w-1/2 top-[92px] z-30 left-1/2 -translate-x-1/2 absolute py-2 text-center bg-[#c93636] text-[#fafafa] rounded-lg shadow">
+        Error to upload image!
+    </div>
+      </div>
+   : 
+   null
+   
+  }
+
+
+  <Back url='/Home' />
+  <form
+    enctype="multipart/form-data"
+    method="POST"
+    class="flex flex-col w-10/12 mx-auto mt-3.5"
+  >
+    <div
+      class="flex flex-col relative items-center h-72 bg-[#383a41] mb-12 rounded-lg border-2 border-purple-500"
+    >
+      <!-- taking the photo -->
+
+      <label class="w-full mt-12 flex justify-center itmes-start" for="formFile">
+        <img id="previewImage" class="w-24" src="/camera.svg" />
+      </label>
+
+      <input
+        type="file"
+        id="formFile"
+        name="file"
+        accept="image/*"
+        capture="environment"
+        class="absolute  w-10/12 top-52 bg-[#675dd3] rounded-lg text-sm"
+      />
+
+      <script>
+        document
+          .getElementById("formFile")
+          .addEventListener("change", function (event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+              document
+                .getElementById("previewImage")
+                .setAttribute("src", e.target.result);
+            };
+
+            reader.readAsDataURL(file);
+          });
+      </script>
+    </div>
+    <label class="mb-2 text-sm" for="hastags">Comment</label>
+    <textarea
+      class="h-20 mb-10 px-3 py-1 bg-[#383a41] rounded-lg focus:outline-none focus:outline-2 focus:outline-purple-500 transition-all duration-75"
+      name="hashtags"
+      id="hashtags"></textarea>
+    <!-- redirect to a confirm page with same input values -->
+    <button
+      type="submit"
+      class="self-end px-3 py-1 border-2 rounded-lg border-purple-500 bg-[#2b2d33] text-purple-500"
+      >Continue</button
+    >
+  </form>
+</General>

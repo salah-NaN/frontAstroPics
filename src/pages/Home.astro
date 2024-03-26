@@ -1,0 +1,143 @@
+---
+import General from "../layouts/General.astro";
+import AddButton from "../components/AddButton.astro";
+
+// constants
+const URL = "https://ricardhernandez.com/api";
+
+// if is not cookie redirect
+if (!Astro.cookies.has("token")) {
+  return Astro.redirect("/");
+}
+
+// to prepare security of fetchs and send a header with cookie
+const token = Astro.cookies.get("token").value;
+
+// fetch to refresh the page and check if cookie is valid
+let invalidToken = false
+const refresh = await fetch(`${URL}/refresh`, {
+  method: "GET",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  },
+})
+  .then((res) => res.json())
+  .then((res) => {
+    if(res.error) invalidToken = true
+  })
+  .catch((err) => console.error(err));
+  // if invalid token then redirect
+  if(invalidToken){
+    return Astro.redirect('/')
+  }
+
+
+
+// fetch to get all images
+let allImages = [];
+const responseAllImages = await fetch(`${URL}/allimages`, {
+  method: "GET",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  },
+})
+  .then((res) => res.json())
+  .then((res) => {
+    allImages = res.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  })
+  .catch((err) => console.error(err));
+
+// fetch all users
+let allUsers;
+const responseAllUsers = await fetch(`${URL}/allUsers`, {
+  method: "GET",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  },
+})
+  .then((res) => res.json())
+  .then((res) => {
+    allUsers = res;
+  })
+  .catch((err) => console.error(err));
+
+  // this is a func helper for making hashtags clickable
+  function shiftHashtag(hashtag){
+    const array = hashtag.split('')
+    array.shift() 
+    const str = array.join('')
+    return str
+  }
+
+
+
+---
+
+<General>
+  <!-- lista de posts -->
+  <ul class="w-11/12 mx-auto mt-28">
+    {
+      allImages && allImages.map((post) => (
+        <li class="post hidden   flex-col justify-end my-7 bg-[#2f3138] rounded-lg shadow-xl">
+          <div class=" flex-grow shrink-0">
+            <div class="w-full h-full rounded-lg relative">
+              <img  class=" object-fit size-full rounded-t-lg " src={`https://ricardhernandez.com/img/${post.image}`} /> 
+              </div>
+            </div>
+          <div class="min-h-24 py-2 px-3">
+            <a href={`/users/${post.userId}`}
+            class="text-lg font-medium" >{post.userName}</a>
+            <div class="text-[15px] truncate line-clamp-2 text-wrap" >{
+              post.hashtags.split(' ').map(word => word.includes('#') ? <a class="text-[#8e5cf5] text-medium" href={`/hashtags/${(word ? shiftHashtag(word) : '')}`}>{word + ' '}</a> : word + ' ')
+            }</div>
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+  <!-- script to control 10 posts offset -->
+  <script>
+
+    function showMorePosts() {
+        const posts = document.querySelectorAll('.post'); 
+        console.log(posts)
+        let visiblePosts = 0; 
+
+        try {
+          posts.forEach(post => {
+              if (post.classList.contains('hidden')) {
+                  post.classList.remove('hidden')
+                  console.log('test')
+                  post.classList.add('flex')
+                  visiblePosts++;
+              }
+              
+              if (visiblePosts >= 10) {
+                throw new Error('Breaking loop')
+              }
+          });
+        } catch (error) {
+          console.log(error)
+        }
+    }
+    
+
+    window.addEventListener('scroll', () => {
+        // Cuando el usuario llega al final de la página, muestra más 
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+            showMorePosts();
+        }
+    });
+    
+    // Llama a showMorePosts una vez para mostrar los primeros 10 posts inicialmente
+    showMorePosts();
+    </script>
+
+  <!-- nuevo post -->
+  <AddButton />
+</General>
+
+
