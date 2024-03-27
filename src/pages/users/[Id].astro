@@ -65,7 +65,7 @@ const responseAllUsers = await fetch(`${URL}/users/${Id}`, {
 })
   .then((res) => res.json())
   .then((res) => {
-    userName = res.userName
+    userName = res.name
   })
   .catch((err) => console.error(err));
   
