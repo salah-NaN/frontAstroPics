@@ -3,7 +3,7 @@ import General from "../../layouts/General.astro";
 import Back from "../../components/Back.astro";
 import AddButton from "../../components/AddButton.astro";
 
-
+// user id
 const { Id } = Astro.params;
 
 // constants
@@ -55,8 +55,8 @@ try {
 }
 
 // fetch all users
-let allUsers;
-const responseAllUsers = await fetch(`${URL}/allUsers`, {
+let userName;
+const responseAllUsers = await fetch(`${URL}/users/${Id}`, {
   method: "GET",
   headers: {
     "Content-Type": "application/json",
@@ -65,7 +65,7 @@ const responseAllUsers = await fetch(`${URL}/allUsers`, {
 })
   .then((res) => res.json())
   .then((res) => {
-    allUsers = res;
+    userName = res.userName
   })
   .catch((err) => console.error(err));
   
@@ -85,7 +85,7 @@ const responseAllUsers = await fetch(`${URL}/allUsers`, {
   
   <div class="flex justify-center items-center gap-24">
     <h2 class="text-2xl font-light bg-clip-text bg-gradient-to-r from-[#50525e] to-[#dadada] text-transparent">
-      
+      {userName}
     </h2>
     <div class="flex flex-col justify-center items-center">
       <p>{posts.length}</p>
