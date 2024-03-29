@@ -28,12 +28,12 @@ export default function DropdownNavBar({ func: handleLogout }) {
             >
                 <img className="size-6" src="/button.svg" ></img>
 
-                <ul className={` absolute top-8 -right-3 w-48 ${isOpen ? 'visible' : 'hidden'} shadow-lg rounded-lg bg-[#2d2e34] backdrop-filter backdrop-blur-lg bg-opacity-70 hover:rounded-lg`}>
-                    <a className=" flex justify-center items-center pl-1 pr-1.5 py-3.5 w-full transition duration-200 text-[#ea499d] hover:bg-[#34343c] " 
+                <ul className={` absolute top-8 -right-3 w-48 ${isOpen ? 'visible' : 'hidden'} shadow-lg rounded-lg bg-[#2d2e34] backdrop-filter backdrop-blur-lg bg-opacity-70`}>
+                    <a className=" flex justify-center items-center pl-1 pr-1.5 py-3.5 w-full transition duration-200 text-[#ea499d] hover:bg-[#34343c] hover:rounded-t-lg " 
                     href="/MyProfile" >
                     <img  className="inline mr-2 " src="/profile-circle.svg" />
                     My profile</a>
-                    <a className={` text-red-500 flex justify-center items-center pl-1 pr-1.5 py-3.5 w-full transition duration-200 hover:bg-[#34343c] `}
+                    <a className={` text-red-500 flex justify-center items-center pl-1 pr-1.5 py-3.5 w-full transition duration-200 hover:bg-[#34343c] hover:rounded-b-lg `}
                     href="/" >
                     <img  className="inline mr-2 " src="/log-out.svg" />
                     Sign out</a>
