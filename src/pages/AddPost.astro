@@ -87,7 +87,7 @@ if (Astro.request.method === "POST") {
   <Back url='/Home' />
   <form
     enctype="multipart/form-data"
-
+    method="post"
     class="flex flex-col w-10/12 mx-auto mt-3.5"
   >
     <div
@@ -133,7 +133,7 @@ if (Astro.request.method === "POST") {
     <!-- redirect to a confirm page with same input values -->
     <button
       id="btnSumbitImage"
-      type="button"
+      type="submit"
       class="self-end px-3 py-1 border-2 rounded-lg border-purple-500 bg-[#2b2d33] text-purple-500"
       >Continue</button
     >
@@ -141,12 +141,9 @@ if (Astro.request.method === "POST") {
   <script>
     const btn = document.getElementById('btnSumbitImage')
     btn.addEventListener('click', () => {
-      console.log('test')
       btn.setAttribute('disabled', true)
       setTimeout(() => {
       btn.removeAttribute('disabled')
-      console.log('finished')
-
       }, 3000);
     })
   </script>
